@@ -24,13 +24,13 @@ namespace CotacaoMoeda.Application.Services
             foreach (var item in itens)
             {
                 var splitDataInicio = item.Data_Inicio.Split("-");
-                var splitDataFim = item.Data_Inicio.Split("-");
+                var splitDataFim = item.Data_Fim.Split("-");
 
                 var datainicio = new DateTime(int.Parse(splitDataInicio[0]), int.Parse(splitDataInicio[1]),
                     int.Parse(splitDataInicio[2]));
 
-                var datafim = new DateTime(int.Parse(splitDataInicio[0]), int.Parse(splitDataInicio[1]),
-                    int.Parse(splitDataInicio[2]));
+                var datafim = new DateTime(int.Parse(splitDataFim[0]), int.Parse(splitDataFim[1]),
+                    int.Parse(splitDataFim[2]));
 
                 itensFila.Add(new ItemFila(item.Moeda, datainicio, datafim));
             }
@@ -60,10 +60,10 @@ namespace CotacaoMoeda.Application.Services
         {
             var fila = _filaService.GetFila();
 
-            var item =  fila.Itens.LastOrDefault();
+            var item = fila.Itens.LastOrDefault();
 
             if (item is null)
-                throw new NotFoundException("Item não encontrado ou inexistente.");
+                throw new NotFoundException("A fila não possui itens.");
 
             _filaService.RemoveItemDaFila(item.Id);
 
@@ -73,6 +73,26 @@ namespace CotacaoMoeda.Application.Services
                 Moeda = item.Moeda,
                 Data_Inicio = item.Data_Inicio.ToString("yyyy/MM/dd"),
                 Data_Fim = item.Data_Fim.ToString("yyyy/MM/dd"),
+            };
+        }
+
+        public ItemFilaViewModel GetItemFilaDataFormatada()
+        {
+            var fila = _filaService.GetFila();
+
+            var item = fila.Itens.LastOrDefault();
+
+            if (item is null)
+                return null;
+
+            _filaService.RemoveItemDaFila(item.Id);
+
+            return new ItemFilaViewModel
+            {
+                Id = item.Id,
+                Moeda = item.Moeda,
+                Data_Inicio = item.Data_Inicio.ToString("dd/MM/yyyy"),
+                Data_Fim = item.Data_Fim.ToString("dd/MM/yyyy"),
             };
         }
     }

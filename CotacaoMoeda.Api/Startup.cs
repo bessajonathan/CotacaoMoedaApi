@@ -7,6 +7,8 @@ using CotacaoMoeda.Domain.Interfaces;
 using CotacaoMoeda.Domain.Services;
 using CotacaoMoeda.Infra.Repository;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.Storage.SQLite;
 using MediatR;
 using MediatR.Pipeline;
 using Microsoft.AspNetCore.Builder;
@@ -15,14 +17,17 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
 
 namespace CotacaoMoeda.Api
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -64,6 +69,10 @@ namespace CotacaoMoeda.Api
                     fv.RegisterValidatorsFromAssemblyContaining<AdicionarItensCommandValidator>());
 
 
+            services.AddHangfire(config =>
+                config.UseSQLiteStorage(Configuration.GetConnectionString("HangfireDatabase")));
+
+
             services.AddSingleton<IFilaApplicationService, FilaApplicationService>();
             services.AddSingleton<IFilaService, FilaService>();
             services.AddSingleton<IFilaRepository, FilaRepository>();
@@ -72,8 +81,10 @@ namespace CotacaoMoeda.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddFile("Logs/logs.txt");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -96,10 +107,19 @@ namespace CotacaoMoeda.Api
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseHangfireServer(new BackgroundJobServerOptions
+            {
+                ServerName = string.Format("{0}.{1}", Environment.MachineName, Guid.NewGuid().ToString())
+            });
+
+            app.UseHangfireDashboard("/jobs");
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            new Jobs(app.ApplicationServices.GetService<IMediator>()).StartBackgroudJobs();
         }
     }
 }

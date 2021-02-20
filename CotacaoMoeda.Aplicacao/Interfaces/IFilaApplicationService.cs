@@ -8,5 +8,6 @@ namespace CotacaoMoeda.Aplicacao.Interfaces
         void AddItemFila(IEnumerable<ItemFilaViewModel> item);
         FilaViewModel GetFila();
         ItemFilaViewModel GetItemFila();
+        ItemFilaViewModel GetItemFilaDataFormatada();
     }
 }
