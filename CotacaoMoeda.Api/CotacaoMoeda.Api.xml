@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CotacaoMoeda.Api</name>
+    </assembly>
+    <members>
+        <member name="M:CotacaoMoeda.Api.Controllers.FilaController.AddItemFila(MediatR.IMediator,CotacaoMoeda.Aplicacao.Fila.Comandos.AdicionarItensCommand)">
+            <summary>
+            Adiciona item na fila
+            </summary>
+        </member>
+        <member name="M:CotacaoMoeda.Api.Controllers.FilaController.GetItemFila(MediatR.IMediator)">
+            <summary>
+            Retornar o último item da fila
+            </summary>
+        </member>
+    </members>
+</doc>
