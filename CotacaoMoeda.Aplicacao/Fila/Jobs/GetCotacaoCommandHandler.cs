@@ -25,7 +25,9 @@ namespace CotacaoMoeda.Application.Fila.Jobs
         }
         public async Task<Unit> Handle(GetCotacaoCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Job iniciada às {DateTime.Now}");
+            var dataInicioProcesso = DateTime.Now;
+
+            _logger.LogInformation($"Job iniciada às {dataInicioProcesso}");
 
             var itemFila = _filaApplicationService.GetItemFilaDataFormatada();
 
@@ -45,7 +47,12 @@ namespace CotacaoMoeda.Application.Fila.Jobs
 
                 GerarArquivoCotacao(dadosMoeda, dadosCotacao);
 
-                _logger.LogInformation($"Job encerrada às {DateTime.Now}");
+                var dataFimProcesso = DateTime.Now;
+                _logger.LogInformation($"Job encerrada às {dataFimProcesso}");
+
+                var tempoProcesso = dataInicioProcesso - dataFimProcesso;
+
+                _logger.LogInformation($"Tempo total de processamento : {tempoProcesso.TotalMinutes}:{tempoProcesso.TotalSeconds}");
             }
             else
             {
